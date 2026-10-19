@@ -1,0 +1,1746 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <link rel="icon" type="image/png" href="./logo-mo-edit.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="تعديل الملفات و تحويل صيغ الملفات و تفريغ الخلفيات بسهولة في MoEdit">
+<meta name="keywords" content="Mo, edit, Delete background, تعديل الصور, حذف الخلفية, انشاء ملف, تعديل الصيغ"
+    <title></title>
+    <!-- Google Fonts: Cairo & Tajawal -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- pdfmake Library for Native Arabic Text Rendering -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <!-- jsPDF Library for Image to PDF Conversion -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            /* Light Theme Variables */
+            --bg-base: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-glass: rgba(255, 255, 255, 0.85);
+            --border-color: #e2e8f0;
+            --border-glow: rgba(37, 99, 235, 0.15);
+            
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --accent-cyan: #06b6d4;
+            
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+            --shadow-lg: 0 20px 30px -10px rgba(37, 99, 235, 0.12);
+            
+            --radius-sm: 10px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme OLED Midnight Variables */
+            --bg-base: #090d16;
+            --bg-surface: #111827;
+            --bg-glass: rgba(17, 24, 39, 0.85);
+            --border-color: #1f293d;
+            --border-glow: rgba(59, 130, 246, 0.3);
+            
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --primary-light: rgba(59, 130, 246, 0.15);
+            --accent-cyan: #22d3ee;
+            
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.4);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 20px 35px -10px rgba(0, 0, 0, 0.7);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+            transition: background-color 0.4s ease, color 0.4s ease;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Header Bar */
+        .navbar {
+            background: var(--bg-glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: var(--transition);
+        }
+        
+
+        .nav-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo img {
+            
+width:60px;
+border-radius:50%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.15rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .icon-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .lang-switch-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 18px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .lang-switch-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container & Layout */
+        .main-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem;
+            width: 100%;
+            flex: 1;
+        }
+
+        /* Hero Section */
+        .hero-banner {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .hero-banner h1 {
+            font-size: 2.6rem;
+            font-weight: 900;
+            color: var(--text-primary);
+            margin-bottom: 0.8rem;
+            background: linear-gradient(135deg, var(--text-primary) 30%, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-banner p {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+            font-weight: 500;
+        }
+
+        /* Navigation Tool Tabs */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 12px 22px;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn i {
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--primary);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .tab-btn.active {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .tab-btn.active i {
+            color: #ffffff;
+        }
+
+        /* Tool Workspace Panels */
+        .workspace-panel {
+            display: none;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workspace-panel.active {
+            display: block;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .panel-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+
+        .panel-header h2 i {
+            color: var(--primary);
+        }
+
+        .panel-header p {
+            color: var(--text-secondary);
+            font-size: 0.98rem;
+        }
+
+        /* Sleek Upload Drop Zones */
+        .drop-zone {
+            border: 2px dashed var(--primary);
+            background: var(--primary-light);
+            border-radius: var(--radius-md);
+            padding: 3.5rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 1.8rem;
+            position: relative;
+        }
+
+        .drop-zone:hover, .drop-zone.dragover {
+            background: rgba(37, 99, 235, 0.2);
+            border-color: var(--primary-hover);
+            transform: scale(1.008);
+        }
+
+        .drop-zone i {
+            font-size: 3.8rem;
+            color: var(--primary);
+            margin-bottom: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .drop-zone:hover i {
+            transform: translateY(-5px) scale(1.05);
+        }
+
+        .drop-zone h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.4rem;
+        }
+
+        .drop-zone p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .hidden-file-input {
+            display: none;
+        }
+
+        /* Input Controls and Grids */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            background: var(--bg-base);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--border-glow);
+        }
+
+        /* Rich Editor Controls */
+        .editor-toolbar {
+            display: flex;
+            gap: 8px;
+            background: var(--bg-base);
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+            flex-wrap: wrap;
+        }
+
+        .editor-btn {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .editor-btn:hover {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+        }
+
+        textarea.editor-area {
+            border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+            min-height: 250px;
+            line-height: 1.8;
+            resize: vertical;
+        }
+
+        /* Red Notice Label */
+        .red-notice {
+            color: #ef4444;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Modal Popup Styling */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 2500;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .modal-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.2rem;
+        }
+
+        .modal-header h3 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .close-modal-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .close-modal-btn:hover {
+            color: #ef4444;
+        }
+
+        .char-counter {
+            text-align: left;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Action Buttons */
+        .btn-action {
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            font-weight: 800;
+            font-size: 1.05rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: var(--transition);
+            box-shadow: var(--shadow-md);
+            width: 100%;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            filter: brightness(1.08);
+        }
+
+        .btn-action:disabled {
+            background: var(--border-color);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Output & Preview Containers */
+        .preview-wrapper {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            animation: fadeInUp 0.4s ease;
+        }
+
+        .preview-box {
+            max-width: 100%;
+            max-height: 480px;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--bg-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .preview-box img, .preview-box canvas {
+            max-width: 100%;
+            max-height: 420px;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Status Badge */
+        .status-badge {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border-glow);
+        }
+
+        /* Floating Action Button (FAB) */
+        .fab-wrapper {
+            position: fixed;
+            bottom: 35px;
+            left: 35px;
+            z-index: 1000;
+        }
+
+        [dir="ltr"] .fab-wrapper {
+            left: auto;
+            right: 35px;
+        }
+
+        .fab-trigger {
+            width: 62px;
+            height: 62px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--accent-cyan));
+            color: #ffffff;
+            border: none;
+            font-size: 1.6rem;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .fab-trigger:hover {
+            transform: scale(1.08);
+        }
+
+        .fab-trigger.active {
+            transform: rotate(135deg);
+            background: #ef4444;
+        }
+
+        .fab-menu {
+            position: absolute;
+            bottom: 75px;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px) scale(0.95);
+            transition: var(--transition);
+            width: 230px;
+        }
+
+        [dir="ltr"] .fab-menu {
+            left: auto;
+            right: 0;
+        }
+
+        .fab-wrapper.open .fab-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
+        }
+
+        .fab-menu-item {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow-lg);
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .fab-menu-item:hover {
+            background: var(--primary);
+            color: #ffffff;
+            transform: translateX(-6px);
+        }
+
+        [dir="ltr"] .fab-menu-item:hover {
+            transform: translateX(6px);
+        }
+
+        .fab-menu-item i {
+            font-size: 1.1rem;
+            width: 22px;
+            text-align: center;
+        }
+
+        /* Notification Toast System */
+        .toast-notification {
+            position: fixed;
+            top: 25px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-120px);
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 14px 28px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            transition: var(--transition);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toast-notification.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .toast-notification.success { border-inline-start: 5px solid #10b981; }
+        .toast-notification.error { border-inline-start: 5px solid #ef4444; }
+
+        /* Footer */
+        footer {
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            padding: 1.8rem;
+            margin-top: auto;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        /* Responsive UI Optimization */
+        @media (max-width: 768px) {
+            .navbar { padding: 0.8rem 1rem; }
+            .main-wrapper { padding: 1.5rem 1rem; }
+            .hero-banner h1 { font-size: 2rem; }
+            .hero-banner p { font-size: 1rem; }
+            .workspace-panel { padding: 1.5rem; }
+            .tabs-container { gap: 8px; }
+            .tab-btn { padding: 10px 14px; font-size: 0.85rem; }
+            .fab-wrapper { bottom: 20px; left: 20px; }
+            [dir="ltr"] .fab-wrapper { right: 20px; }
+        }
+        
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="brand-logo">
+                <img src="logo-mo-edit.png">
+                <span id="app-logo-text">MoEdit  </span>
+            </a>
+            <div class="nav-actions">
+                <button class="icon-btn" id="theme-toggle-btn" title="تبديل الوضع">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="lang-switch-btn" id="lang-switch-btn">
+                    <i class="fa-solid fa-globe"></i>
+                    <span id="lang-text-label">English</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-wrapper">
+        <!-- Hero Title Banner -->
+        <section class="hero-banner">
+            <h1 id="hero-title">تعديل الملفات و تفريغ الخلفيات بسهولة</h1>
+            <p id="hero-subtitle">تفريغ خلفيات الصور بدقة، صناعة وتصدير ملفات PDF، ضغط الصور وتحويل الصيغ بسرعة فائقة وأداء احترافي.</p>
+        </section>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs-container">
+            <button class="tab-btn active" data-tab="bg-remover-tool">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span data-i18n="tabBgRemover">تفريغ الخلفية</span>
+            </button>
+            <button class="tab-btn" data-tab="pdf-creator-tool">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span data-i18n="tabPdfCreator">صناعة PDF</span>
+            </button>
+            <button class="tab-btn" data-tab="format-converter-tool">
+                <i class="fa-solid fa-right-left"></i>
+                <span data-i18n="tabConverter">تحويل الصيغ</span>
+            </button>
+            <button class="tab-btn" data-tab="image-compressor-tool">
+                <i class="fa-solid fa-compress"></i>
+                <span data-i18n="tabCompressor">ضغط وتكشيف</span>
+            </button>
+            <button class="tab-btn" data-tab="image-resizer-tool">
+                <i class="fa-solid fa-expand"></i>
+                <span data-i18n="tabResizer">تغيير الأبعاد</span>
+            </button>
+            <button class="tab-btn" data-tab="img-to-pdf-tool">
+                <i class="fa-solid fa-images"></i>
+                <span data-i18n="tabImgToPdf">دمج صور لـ PDF</span>
+            </button>
+        </div>
+
+        <!-- Tool 1: Precision Background Remover -->
+        <div class="workspace-panel active" id="bg-remover-tool">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-wand-magic-sparkles"></i> <span data-i18n="bgTitle">تفريغ خلفية الصور بدقة عالية</span></h2>
+                <p data-i18n="bgDesc">إزالة الألوان والخلفيات تلقائياً بدقة خوارزمية وتسامح ذكي</p>
+            </div>
+            
+            <div class="drop-zone" onclick="document.getElementById('bg-file-input').click()">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h3 data-i18n="dropText">اسحب وأسقط الصورة هنا أو اضغط للتصفح</h3>
+                <p data-i18n="dropSub">يدعم صيغ PNG, JPG, WEBP</p>
+                <input type="file" id="bg-file-input" class="hidden-file-input" accept="image/*">
+            </div>
+
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label data-i18n="toleranceLabel">درجة التسامح والحساسية (Tolerance)</label>
+                    <input type="range" id="bg-tolerance-slider" min="5" max="120" value="35" class="form-control">
+                </div>
+            </div>
+
+            <button class="btn-action" id="bg-process-btn" disabled>
+                <i class="fa-solid fa-bolt"></i>
+                <span data-i18n="bgProcessBtn">بدء تفريغ الخلفية الآن</span>
+            </button>
+
+            <div class="preview-wrapper" id="bg-preview-wrapper" style="display: none;">
+                <div class="preview-box">
+                    <canvas id="bg-canvas-result"></canvas>
+                </div>
+                <button class="btn-action" id="bg-download-btn">
+                    <i class="fa-solid fa-download"></i>
+                    <span data-i18n="downloadBtn">تحميل الصورة الشفافة (PNG)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool 2: Document & PDF Creator -->
+        <div class="workspace-panel" id="pdf-creator-tool">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-file-pdf"></i> <span data-i18n="pdfTitle">صناعة وتعديل المستندات و PDF</span></h2>
+                <p data-i18n="pdfDesc">اكتب وتنسيق نصوصك وتصديرها فوراً إلى ملفات PDF أو TXT</p>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+                <label data-i18n="pdfDocTitle">عنوان المستند</label>
+                <input type="text" id="pdf-title-field" class="form-control" placeholder="أدخل عنوان الملف...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+                <label data-i18n="pdfDocContent">محتوى النص</label>
+                <span class="red-notice" data-i18n="pdfArabicWarning">* لا يدعم اللغة العربية حالياً عند التصدير لـ PDF</span>
+                <div class="editor-toolbar">
+                    <button class="editor-btn" type="button" onclick="formatEditorText('bold')"><b>B</b></button>
+                    <button class="editor-btn" type="button" onclick="formatEditorText('italic')"><i>I</i></button>
+                    <button class="editor-btn" type="button" onclick="insertEditorHeader()">H1</button>
+                    <button class="editor-btn" type="button" onclick="clearEditorText()"><i class="fa-solid fa-trash-can"></i></button>
+                </div>
+                <textarea id="pdf-content-area" class="form-control editor-area" placeholder="اكتب أو الصق نصك هنا..."></textarea>
+            </div>
+
+            <div class="controls-grid" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label data-i18n="pdfMarginLabel">الهوامش (ملم)</label>
+                    <input type="number" id="pdf-margin-input" class="form-control" value="15" min="0" max="50">
+                </div>
+            </div>
+
+            <div class="controls-grid">
+                <button class="btn-action" id="pdf-export-pdf-btn">
+                    <i class="fa-solid fa-file-pdf"></i>
+                    <span data-i18n="pdfGenerateBtn">تصدير كملف PDF</span>
+                </button>
+                <button class="btn-action" id="pdf-export-txt-btn" style="background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-color);">
+                    <i class="fa-solid fa-file-lines"></i>
+                    <span data-i18n="pdfTxtBtn">تصدير كملف TXT</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool 3: Image Format Converter -->
+        <div class="workspace-panel" id="format-converter-tool">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-right-left"></i> <span data-i18n="convTitle">تحويل صيغ الصور</span></h2>
+                <p data-i18n="convDesc">تحويل سريع ومباشر بين صيغ PNG, JPG, WEBP, GIF, BMP</p>
+            </div>
+
+            <div class="drop-zone" onclick="document.getElementById('conv-file-input').click()">
+                <i class="fa-solid fa-file-image"></i>
+                <h3 data-i18n="dropText">اسحب وأسقط الصورة هنا أو اضغط للتصفح</h3>
+                <input type="file" id="conv-file-input" class="hidden-file-input" accept="image/*">
+            </div>
+
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label data-i18n="targetFormat">الصيغة المطلوبة للتحويل</label>
+                    <select id="conv-format-select" class="form-control">
+                        <option value="image/png">PNG (.png)</option>
+                        <option value="image/jpeg">JPG / JPEG (.jpg)</option>
+                        <option value="image/webp">WEBP (.webp)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-action" id="conv-process-btn" disabled>
+                <i class="fa-solid fa-arrows-rotate"></i>
+                <span data-i18n="convProcessBtn">تحويل الصيغة الآن</span>
+            </button>
+
+            <div class="preview-wrapper" id="conv-preview-wrapper" style="display: none;">
+                <div class="preview-box">
+                    <img id="conv-result-img" alt="Converted Result">
+                </div>
+                <button class="btn-action" id="conv-download-btn">
+                    <i class="fa-solid fa-download"></i>
+                    <span data-i18n="downloadBtn">تحميل الصورة المحولة</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool 4: Image Compressor -->
+        <div class="workspace-panel" id="image-compressor-tool">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-compress"></i> <span data-i18n="compTitle">ضغط وتقليل حجم الصور</span></h2>
+                <p data-i18n="compDesc">تقليل مساحة الصورة الذكي مع الحفاظ على وضوح التفاصيل</p>
+            </div>
+
+            <div class="drop-zone" onclick="document.getElementById('comp-file-input').click()">
+                <i class="fa-solid fa-file-contract"></i>
+                <h3 data-i18n="dropText">اسحب وأسقط الصورة هنا أو اضغط للتصفح</h3>
+                <input type="file" id="comp-file-input" class="hidden-file-input" accept="image/*">
+            </div>
+
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label data-i18n="qualityLabel">نسبة الجودة (<span id="comp-quality-val">80</span>%)</label>
+                    <input type="range" id="comp-quality-slider" min="10" max="95" value="80" class="form-control">
+                </div>
+            </div>
+
+            <button class="btn-action" id="comp-process-btn" disabled>
+                <i class="fa-solid fa-minimize"></i>
+                <span data-i18n="compProcessBtn">بدء ضغط الصورة</span>
+            </button>
+
+            <div class="preview-wrapper" id="comp-preview-wrapper" style="display: none;">
+                <div class="status-badge" id="comp-size-info"><i class="fa-solid fa-circle-info"></i> <span></span></div>
+                <div class="preview-box">
+                    <img id="comp-result-img" alt="Compressed Result">
+                </div>
+                <button class="btn-action" id="comp-download-btn">
+                    <i class="fa-solid fa-download"></i>
+                    <span data-i18n="downloadBtn">تحميل الصورة المضغوطة</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool 5: Image Resizer -->
+        <div class="workspace-panel" id="image-resizer-tool">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-expand"></i> <span data-i18n="resizeTitle">تغيير أبعاد ومقاسات الصور</span></h2>
+                <p data-i18n="resizeDesc">تعديل دقيق للعرض والارتفاع بالبكسل مع خيار القفل التناسبى</p>
+            </div>
+
+            <div class="drop-zone" onclick="document.getElementById('resize-file-input').click()">
+                <i class="fa-solid fa-up-right-and-down-left-from-center"></i>
+                <h3 data-i18n="dropText">اسحب وأسقط الصورة هنا أو اضغط للتصفح</h3>
+                <input type="file" id="resize-file-input" class="hidden-file-input" accept="image/*">
+            </div>
+
+            <div class="controls-grid">
+                <div class="form-group">
+                    <label data-i18n="widthPx">العرض (بكسل)</label>
+                    <input type="number" id="resize-width-input" class="form-control" placeholder="800">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="heightPx">الارتفاع (بكسل)</label>
+                    <input type="number" id="resize-height-input" class="form-control" placeholder="600">
+                </div>
+            </div>
+
+            <button class="btn-action" id="resize-process-btn" disabled>
+                <i class="fa-solid fa-maximize"></i>
+                <span data-i18n="resizeProcessBtn">تطبيق المقاسات الجديدة</span>
+            </button>
+
+            <div class="preview-wrapper" id="resize-preview-wrapper" style="display: none;">
+                <div class="preview-box">
+                    <canvas id="resize-canvas-result"></canvas>
+                </div>
+                <button class="btn-action" id="resize-download-btn">
+                    <i class="fa-solid fa-download"></i>
+                    <span data-i18n="downloadBtn">تحميل الصورة بالمقاس الجديد</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool 6: Images to PDF Merge -->
+        <div class="workspace-panel" id="img-to-pdf-tool">
+            <div class="panel-header">
+                <h2><i class="fa-solid fa-images"></i> <span data-i18n="imgPdfTitle">دمج مجموعة صور إلى ملف PDF</span></h2>
+                <p data-i18n="imgPdfDesc">اختر عدة صور لدمجها وترتيبها وتصديرها كملف PDF موحد</p>
+            </div>
+
+            <div class="drop-zone" onclick="document.getElementById('img-pdf-file-input').click()">
+                <i class="fa-solid fa-folder-plus"></i>
+                <h3 data-i18n="dropMultiText">اختر عدة صور لدمجها</h3>
+                <input type="file" id="img-pdf-file-input" class="hidden-file-input" accept="image/*" multiple>
+            </div>
+
+            <div class="controls-grid" style="margin-bottom: 1.5rem;">
+                <div class="form-group">
+                    <label data-i18n="imgPdfSizeMode">طريقة ملاءمة أبعاد الصورة</label>
+                    <select id="img-pdf-fit-mode" class="form-control">
+                        <option value="full_page">مطابقة أبعاد الصفحة للصورة الأصلية (100% Full Dimension)</option>
+                        <option value="a4_fit">احتواء تلقائي بصفحة A4 القياسية</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="pdfMarginLabel">الهوامش (ملم)</label>
+                    <input type="number" id="img-pdf-margin-input" class="form-control" value="0" min="0" max="50">
+                </div>
+            </div>
+
+            <div class="status-badge" id="img-pdf-count-badge" style="display: none; margin: 0 auto 1.5rem auto;"></div>
+
+            <button class="btn-action" id="img-pdf-process-btn" disabled>
+                <i class="fa-solid fa-file-pdf"></i>
+                <span data-i18n="imgPdfProcessBtn">تصدير ملف PDF المدمج</span>
+            </button>
+        </div>
+    </main>
+
+    <!-- Floating Action Speed-Dial Button (FAB) -->
+    <div class="fab-wrapper" id="fab-wrapper">
+        <button class="fab-trigger" id="fab-trigger" title="وصول سريع للأدوات">
+            <i class="fa-solid fa-plus"></i>
+        </button>
+        <div class="fab-menu">
+            <div class="fab-menu-item" onclick="switchActiveTab('bg-remover-tool')">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <span data-i18n="tabBgRemover">تفريغ صورة</span>
+            </div>
+            <div class="fab-menu-item" onclick="switchActiveTab('pdf-creator-tool')">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span data-i18n="tabPdfCreator">صناعة PDF</span>
+            </div>
+            <div class="fab-menu-item" onclick="switchActiveTab('format-converter-tool')">
+                <i class="fa-solid fa-right-left"></i>
+                <span data-i18n="tabConverter">تحويل صيغة</span>
+            </div>
+            <div class="fab-menu-item" onclick="switchActiveTab('image-compressor-tool')">
+                <i class="fa-solid fa-compress"></i>
+                <span data-i18n="tabCompressor">ضغط صورة</span>
+            </div>
+            <div class="fab-menu-item" onclick="openSuggestionsModal()">
+                <i class="fa-solid fa-lightbulb"></i>
+                <span data-i18n="tabSuggestions">اقتراحاتك</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Suggestions Modal -->
+    <div class="modal-overlay" id="suggestions-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> <span data-i18n="modalTitle">شاركنا اقتراحاتك</span></h3>
+                <button class="close-modal-btn" onclick="closeSuggestionsModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label data-i18n="modalLabel">اكتب اقتراحك هنا (100 حرف كحد أقصى):</label>
+                <textarea id="suggestion-text" class="form-control" maxlength="100" rows="4" placeholder="اكتب أي ملاحظة أو اقتراح..." oninput="updateCharCount()"></textarea>
+                <div class="char-counter"><span id="char-count">0</span> / 100</div>
+            </div>
+            <button class="btn-action" onclick="sendSuggestion()">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+                <span data-i18n="sendBtn">إرسال الاقتراح</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- System Toast Notification -->
+    <div class="toast-notification" id="system-toast">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-text-msg">تمت العملية بنجاح!</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+    <p>&copy; MO Design 2026</p>
+    </footer>
+
+    <script>
+        // --- Multilingual Dictionary ---
+        const languageDict = {
+            ar: {
+                appLogoText: "MoEdit",
+                heroTitle: "MoEdit",
+                heroSubtitle: "تفريغ خلفيات الصور بدقة، صناعة وتصدير ملفات PDF، ضغط الصور وتحويل الصيغ بسرعة فائقة وأداء احترافي.",
+                tabBgRemover: "تفريغ الخلفية",
+                tabPdfCreator: "صناعة PDF",
+                tabConverter: "تحويل الصيغ",
+                tabCompressor: "ضغط وتكشيف",
+                tabResizer: "تغيير الأبعاد",
+                tabImgToPdf: "دمج صور لـ PDF",
+                tabSuggestions: "اقتراحاتك",
+                bgTitle: "تفريغ خلفية الصور بدقة عالية",
+                bgDesc: "إزالة الألوان والخلفيات تلقائياً بدقة خوارزمية وتسامح ذكي",
+                dropText: "اسحب وأسقط الصورة هنا أو اضغط للتصفح",
+                dropSub: "يدعم صيغ PNG, JPG, WEBP",
+                toleranceLabel: "درجة التسامح والحساسية (Tolerance)",
+                bgProcessBtn: "بدء تفريغ الخلفية الآن",
+                downloadBtn: "تحميل الصورة الناتجة",
+                pdfTitle: "صناعة وتعديل المستندات و PDF",
+                pdfDesc: "اكتب وتنسيق نصوصك وتصديرها فوراً إلى ملفات PDF أو TXT",
+                pdfDocTitle: "عنوان المستند",
+                pdfDocContent: "محتوى النص",
+                pdfArabicWarning: "* لا يدعم اللغة العربية حالياً عند التصدير لـ PDF",
+                pdfMarginLabel: "الهوامش (ملم)",
+                pdfGenerateBtn: "تصدير كملف PDF",
+                pdfTxtBtn: "تصدير كملف TXT",
+                convTitle: "تحويل صيغ الصور",
+                convDesc: "تحويل سريع ومباشر بين صيغ PNG, JPG, WEBP, GIF, BMP",
+                targetFormat: "الصيغة المطلوبة للتحويل",
+                convProcessBtn: "تحويل الصيغة الآن",
+                compTitle: "ضغط وتقليل حجم الصور",
+                compDesc: "تقليل مساحة الصورة الذكي مع الحفاظ على وضوح التفاصيل",
+                qualityLabel: "نسبة الجودة",
+                compProcessBtn: "بدء ضغط الصورة",
+                resizeTitle: "تغيير أبعاد ومقاسات الصور",
+                resizeDesc: "تعديل دقيق للعرض والارتفاع بالبكسل مع خيار القفل التناسبى",
+                widthPx: "العرض (بكسل)",
+                heightPx: "الارتفاع (بكسل)",
+                resizeProcessBtn: "تطبيق المقاسات الجديدة",
+                imgPdfTitle: "دمج مجموعة صور إلى ملف PDF",
+                imgPdfDesc: "اختر عدة صور لدمجها وترتيبها وتصديرها كملف PDF موحد",
+                imgPdfSizeMode: "طريقة ملاءمة أبعاد الصورة",
+                dropMultiText: "اختر عدة صور لدمجها",
+                imgPdfProcessBtn: "تصدير ملف PDF المدمج",
+                modalTitle: "شاركنا اقتراحاتك",
+                modalLabel: "اكتب اقتراحك هنا (100 حرف كحد أقصى):",
+                sendBtn: "إرسال الاقتراح",
+                toastSuccess: "تمت العملية بنجاح!",
+                toastLoaded: "تم تحميل الملف بنجاح"
+            },
+            en: {
+                appLogoText: "MoEdit Edit your files easily ",
+                heroTitle: "MoEdit File Utility & Image Suite",
+                heroSubtitle: "Precision background removal, PDF creation & export, image compression, and format conversion in seconds.",
+                tabBgRemover: "BG Remover",
+                tabPdfCreator: "PDF Creator",
+                tabConverter: "Converter",
+                tabCompressor: "Compressor",
+                tabResizer: "Resizer",
+                tabImgToPdf: "Images to PDF",
+                tabSuggestions: "Suggestions",
+                bgTitle: "Precision Background Remover",
+                bgDesc: "Automatically remove solid backgrounds with algorithm precision",
+                dropText: "Drag & drop image here or click to browse",
+                dropSub: "Supports PNG, JPG, WEBP",
+                toleranceLabel: "Color Tolerance & Sensitivity",
+                bgProcessBtn: "Process Background Removal",
+                downloadBtn: "Download Resulting File",
+                pdfTitle: "Document & PDF Creator",
+                pdfDesc: "Compose rich text documents and export directly to PDF or TXT",
+                pdfDocTitle: "Document Title",
+                pdfDocContent: "Text Content",
+                pdfArabicWarning: "* Arabic language is currently not supported for PDF export",
+                pdfMarginLabel: "Margins (mm)",
+                pdfGenerateBtn: "Export to PDF",
+                pdfTxtBtn: "Export to TXT",
+                convTitle: "Image Format Converter",
+                convDesc: "Seamless conversion between PNG, JPG, WEBP formats",
+                targetFormat: "Target Output Format",
+                convProcessBtn: "Convert Format Now",
+                compTitle: "Smart Image Compressor",
+                compDesc: "Reduce image file size while preserving high visual clarity",
+                qualityLabel: "Quality Percentage",
+                compProcessBtn: "Compress Image Now",
+                resizeTitle: "Image Dimension Resizer",
+                resizeDesc: "Adjust pixel width and height dimensions accurately",
+                widthPx: "Width (Pixels)",
+                heightPx: "Height (Pixels)",
+                resizeProcessBtn: "Apply New Dimensions",
+                imgPdfTitle: "Merge Images into PDF",
+                imgPdfDesc: "Select multiple image files and export as a single PDF document",
+                imgPdfSizeMode: "Image Fitting Mode",
+                dropMultiText: "Select multiple image files",
+                imgPdfProcessBtn: "Export Merged PDF File",
+                modalTitle: "Share Your Suggestions",
+                modalLabel: "Write your suggestion here (max 100 characters):",
+                sendBtn: "Send Suggestion",
+                toastSuccess: "Operation completed successfully!",
+                toastLoaded: "File loaded successfully"
+            }
+        };
+
+        let currentActiveLang = 'ar';
+
+        // --- Theme Switcher ---
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        themeToggleBtn.addEventListener('click', () => {
+            const isDarkMode = document.body.getAttribute('data-theme') === 'dark';
+            if (isDarkMode) {
+                document.body.removeAttribute('data-theme');
+                themeToggleBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                themeToggleBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+            }
+        });
+
+        // --- Language Switcher ---
+        const langSwitchBtn = document.getElementById('lang-switch-btn');
+        langSwitchBtn.addEventListener('click', () => {
+            currentActiveLang = currentActiveLang === 'ar' ? 'en' : 'ar';
+            document.documentElement.dir = currentActiveLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentActiveLang;
+            document.getElementById('lang-text-label').innerText = currentActiveLang === 'ar' ? 'English' : 'عربي';
+            applyLanguageDictionary();
+        });
+
+        function applyLanguageDictionary() {
+            const dict = languageDict[currentActiveLang];
+            document.getElementById('app-logo-text').innerText = dict.appLogoText;
+            document.getElementById('hero-title').innerText = dict.heroTitle;
+            document.getElementById('hero-subtitle').innerText = dict.heroSubtitle;
+
+            document.querySelectorAll('[data-i18n]').forEach(element => {
+                const dictKey = element.getAttribute('data-i18n');
+                if (dict[dictKey]) {
+                    element.innerText = dict[dictKey];
+                }
+            });
+        }
+
+        // --- FAB Speed Dial Toggle ---
+        const fabWrapper = document.getElementById('fab-wrapper');
+        const fabTrigger = document.getElementById('fab-trigger');
+        fabTrigger.addEventListener('click', () => {
+            fabWrapper.classList.toggle('open');
+            fabTrigger.classList.toggle('active');
+        });
+
+        // --- Suggestions Modal Handlers ---
+        function openSuggestionsModal() {
+            document.getElementById('suggestions-modal').classList.add('active');
+            fabWrapper.classList.remove('open');
+            fabTrigger.classList.remove('active');
+        }
+
+        function closeSuggestionsModal() {
+            document.getElementById('suggestions-modal').classList.remove('active');
+        }
+
+        function updateCharCount() {
+            const text = document.getElementById('suggestion-text').value;
+            document.getElementById('char-count').innerText = text.length;
+        }
+
+        function sendSuggestion() {
+            const text = document.getElementById('suggestion-text').value.trim();
+            if (!text) {
+                displayToast(currentActiveLang === 'ar' ? 'يرجى كتابة نص الاقتراح أولاً' : 'Please write your suggestion first', 'error');
+                return;
+            }
+            const email = "modamoazmm@gmail.com";
+            const subject = encodeURIComponent("اقتراح جديد من منصة الملفات الذكية");
+            const body = encodeURIComponent(text);
+            
+            // Redirecting to Mailto Link
+            window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+            
+            displayToast(currentActiveLang === 'ar' ? 'جاري توجيهك لإرسال البريد...' : 'Redirecting to email client...');
+            document.getElementById('suggestion-text').value = '';
+            updateCharCount();
+            closeSuggestionsModal();
+        }
+
+        // --- Tab Navigation Switcher ---
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const workspacePanels = document.querySelectorAll('.workspace-panel');
+
+        function switchActiveTab(targetTabId) {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            workspacePanels.forEach(panel => panel.classList.remove('active'));
+
+            const selectedBtn = document.querySelector(`.tab-btn[data-tab="${targetTabId}"]`);
+            const selectedPanel = document.getElementById(targetTabId);
+
+            if (selectedBtn && selectedPanel) {
+                selectedBtn.classList.add('active');
+                selectedPanel.classList.add('active');
+            }
+
+            fabWrapper.classList.remove('open');
+            fabTrigger.classList.remove('active');
+        }
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                switchActiveTab(button.getAttribute('data-tab'));
+            });
+        });
+
+        // --- Toast System ---
+        function displayToast(msg, type = 'success') {
+            const toast = document.getElementById('system-toast');
+            const toastMsg = document.getElementById('toast-text-msg');
+            toastMsg.innerText = msg;
+            toast.className = `toast-notification show ${type}`;
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3200);
+        }
+
+        // Helper File Upload Reader
+        function bindFileInput(inputId, callback) {
+            const elem = document.getElementById(inputId);
+            elem.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files.length > 0) {
+                    callback(e.target.files);
+                }
+            });
+        }
+
+        // --- 1. Background Remover Logic ---
+        let loadedBgImg = null;
+        bindFileInput('bg-file-input', (files) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadedBgImg = new Image();
+                loadedBgImg.onload = () => {
+                    document.getElementById('bg-process-btn').disabled = false;
+                    displayToast(languageDict[currentActiveLang].toastLoaded);
+                };
+                loadedBgImg.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        });
+
+        document.getElementById('bg-process-btn').addEventListener('click', () => {
+            if (!loadedBgImg) return;
+            const canvas = document.getElementById('bg-canvas-result');
+            const ctx = canvas.getContext('2d');
+            canvas.width = loadedBgImg.width;
+            canvas.height = loadedBgImg.height;
+
+            ctx.drawImage(loadedBgImg, 0, 0);
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const pixels = imgData.data;
+
+            const tolerance = parseInt(document.getElementById('bg-tolerance-slider').value);
+            const targetR = pixels[0], targetG = pixels[1], targetB = pixels[2];
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+                const diff = Math.sqrt((r - targetR) ** 2 + (g - targetG) ** 2 + (b - targetB) ** 2);
+                if (diff < tolerance) {
+                    pixels[i + 3] = 0; // Set Alpha to Transparent
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+            document.getElementById('bg-preview-wrapper').style.display = 'flex';
+            displayToast(languageDict[currentActiveLang].toastSuccess);
+        });
+
+        document.getElementById('bg-download-btn').addEventListener('click', () => {
+            const canvas = document.getElementById('bg-canvas-result');
+            const link = document.createElement('a');
+            link.download = 'transparent-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // --- 2. Document & PDF Creator Logic ---
+        function formatEditorText(command) {
+            const textarea = document.getElementById('pdf-content-area');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+
+            let before = "", after = "";
+            if (command === 'bold') {
+                before = "**";
+                after = "**";
+            } else if (command === 'italic') {
+                before = "_";
+                after = "_";
+            }
+
+            if (start !== end) {
+                textarea.value = text.substring(0, start) + before + selectedText + after + text.substring(end);
+                textarea.selectionStart = start;
+                textarea.selectionEnd = end + before.length + after.length;
+            } else {
+                textarea.value = text.substring(0, start) + before + after + text.substring(end);
+                textarea.selectionStart = textarea.selectionEnd = start + before.length;
+            }
+            textarea.focus();
+        }
+
+        function insertEditorHeader() {
+            const textarea = document.getElementById('pdf-content-area');
+            const start = textarea.selectionStart;
+            const text = textarea.value;
+            textarea.value = text.substring(0, start) + "# " + text.substring(start);
+            textarea.focus();
+        }
+
+        function clearEditorText() {
+            document.getElementById('pdf-content-area').value = '';
+            document.getElementById('pdf-title-field').value = '';
+        }
+
+        // Helper function to parse markdown (Bold & Italic) for pdfmake
+        function parseFormattedContent(rawText) {
+            const lines = rawText.split('\n');
+            const pdfContent = [];
+
+            lines.forEach(line => {
+                if (line.startsWith('# ')) {
+                    pdfContent.push({ text: line.replace('# ', ''), style: 'header' });
+                    return;
+                }
+
+                // Parse Bold **text** and Italic _text_
+                const parts = [];
+                const regex = /(\*\*.*?\*\*|_.*?_)/g;
+                let lastIdx = 0;
+                let match;
+
+                while ((match = regex.exec(line)) !== null) {
+                    if (match.index > lastIdx) {
+                        parts.push({ text: line.substring(lastIdx, match.index) });
+                    }
+                    const matchedStr = match[0];
+                    if (matchedStr.startsWith('**') && matchedStr.endsWith('**')) {
+                        parts.push({ text: matchedStr.slice(2, -2), bold: true });
+                    } else if (matchedStr.startsWith('_') && matchedStr.endsWith('_')) {
+                        parts.push({ text: matchedStr.slice(1, -1), italics: true });
+                    }
+                    lastIdx = regex.lastIndex;
+                }
+
+                if (lastIdx < line.length) {
+                    parts.push({ text: line.substring(lastIdx) });
+                }
+
+                if (parts.length > 0) {
+                    pdfContent.push({ text: parts, style: 'body' });
+                } else {
+                    pdfContent.push({ text: '\n' });
+                }
+            });
+
+            return pdfContent;
+        }
+
+        // Export PDF using pdfmake
+        document.getElementById('pdf-export-pdf-btn').addEventListener('click', () => {
+            const title = document.getElementById('pdf-title-field').value || 'Document';
+            const content = document.getElementById('pdf-content-area').value;
+            const marginVal = parseFloat(document.getElementById('pdf-margin-input').value) || 15;
+
+            if (!content) {
+                displayToast(currentActiveLang === 'ar' ? 'الرجاء ادخال نص للمستند' : 'Please enter text content', 'error');
+                return;
+            }
+
+            try {
+                const marginPoints = marginVal * 2.83465;
+                const formattedElements = parseFormattedContent(content);
+
+                const docDefinition = {
+                    pageMargins: [marginPoints, marginPoints, marginPoints, marginPoints],
+                    content: [
+                        { text: title, style: 'header', alignment: currentActiveLang === 'ar' ? 'right' : 'left' },
+                        { text: '\n' },
+                        ...formattedElements
+                    ],
+                    styles: {
+                        header: { fontSize: 20, bold: true, marginBottom: 10 },
+                        body: { fontSize: 13, lineHeight: 1.4, marginBottom: 6 }
+                    },
+                    defaultStyle: {
+                        font: 'Roboto'
+                    }
+                };
+
+                pdfMake.createPdf(docDefinition).download(`${title}.pdf`);
+                displayToast(languageDict[currentActiveLang].toastSuccess);
+            } catch (err) {
+                displayToast(currentActiveLang === 'ar' ? 'حدث خطأ أثناء تصدير PDF' : 'Error generating PDF', 'error');
+            }
+        });
+
+        // Export TXT
+        document.getElementById('pdf-export-txt-btn').addEventListener('click', () => {
+            const title = document.getElementById('pdf-title-field').value || 'Document';
+            const content = document.getElementById('pdf-content-area').value;
+
+            if (!content) {
+                displayToast(currentActiveLang === 'ar' ? 'الرجاء ادخال نص للمستند' : 'Please enter text content', 'error');
+                return;
+            }
+
+            const blob = new Blob([`${title}\n\n${content}`], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.download = `${title}.txt`;
+            link.href = URL.createObjectURL(blob);
+            link.click();
+            displayToast(languageDict[currentActiveLang].toastSuccess);
+        });
+
+        // --- 3. Image Format Converter Logic ---
+        let loadedConvImg = null;
+        bindFileInput('conv-file-input', (files) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadedConvImg = new Image();
+                loadedConvImg.onload = () => {
+                    document.getElementById('conv-process-btn').disabled = false;
+                    displayToast(languageDict[currentActiveLang].toastLoaded);
+                };
+                loadedConvImg.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        });
+
+        document.getElementById('conv-process-btn').addEventListener('click', () => {
+            if (!loadedConvImg) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = loadedConvImg.width;
+            canvas.height = loadedConvImg.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(loadedConvImg, 0, 0);
+
+            const format = document.getElementById('conv-format-select').value;
+            const convertedDataUrl = canvas.toDataURL(format, 0.95);
+
+            const resultImg = document.getElementById('conv-result-img');
+            resultImg.src = convertedDataUrl;
+            document.getElementById('conv-preview-wrapper').style.display = 'flex';
+            displayToast(languageDict[currentActiveLang].toastSuccess);
+        });
+
+        document.getElementById('conv-download-btn').addEventListener('click', () => {
+            const resultImg = document.getElementById('conv-result-img');
+            const format = document.getElementById('conv-format-select').value;
+            const ext = format.split('/')[1];
+            const link = document.createElement('a');
+            link.download = `converted-file.${ext}`;
+            link.href = resultImg.src;
+            link.click();
+        });
+
+        // --- 4. Image Compressor Logic ---
+        let loadedCompImg = null;
+        const compQualitySlider = document.getElementById('comp-quality-slider');
+        compQualitySlider.addEventListener('input', (e) => {
+            document.getElementById('comp-quality-val').innerText = e.target.value;
+        });
+
+        bindFileInput('comp-file-input', (files) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadedCompImg = new Image();
+                loadedCompImg.onload = () => {
+                    document.getElementById('comp-process-btn').disabled = false;
+                    displayToast(languageDict[currentActiveLang].toastLoaded);
+                };
+                loadedCompImg.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        });
+
+        document.getElementById('comp-process-btn').addEventListener('click', () => {
+            if (!loadedCompImg) return;
+            const canvas = document.createElement('canvas');
+            canvas.width = loadedCompImg.width;
+            canvas.height = loadedCompImg.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(loadedCompImg, 0, 0);
+
+            const qualityVal = parseInt(compQualitySlider.value) / 100;
+            const compressedUrl = canvas.toDataURL('image/jpeg', qualityVal);
+
+            const resultImg = document.getElementById('comp-result-img');
+            resultImg.src = compressedUrl;
+
+            const approxKb = Math.round((compressedUrl.length * 3) / 4 / 1024);
+            document.querySelector('#comp-size-info span').innerText = `${currentActiveLang === 'ar' ? 'الحجم الجديد التقريبي:' : 'Approx New Size:'} ${approxKb} KB`;
+
+            document.getElementById('comp-preview-wrapper').style.display = 'flex';
+            displayToast(languageDict[currentActiveLang].toastSuccess);
+        });
+
+        document.getElementById('comp-download-btn').addEventListener('click', () => {
+            const resultImg = document.getElementById('comp-result-img');
+            const link = document.createElement('a');
+            link.download = 'compressed-image.jpg';
+            link.href = resultImg.src;
+            link.click();
+        });
+
+        // --- 5. Image Resizer Logic ---
+        let loadedResizeImg = null;
+        bindFileInput('resize-file-input', (files) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                loadedResizeImg = new Image();
+                loadedResizeImg.onload = () => {
+                    document.getElementById('resize-width-input').value = loadedResizeImg.width;
+                    document.getElementById('resize-height-input').value = loadedResizeImg.height;
+                    document.getElementById('resize-process-btn').disabled = false;
+                    displayToast(languageDict[currentActiveLang].toastLoaded);
+                };
+                loadedResizeImg.src = e.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        });
+
+        document.getElementById('resize-process-btn').addEventListener('click', () => {
+            if (!loadedResizeImg) return;
+            const w = parseInt(document.getElementById('resize-width-input').value);
+            const h = parseInt(document.getElementById('resize-height-input').value);
+
+            if (!w || !h) {
+                displayToast(currentActiveLang === 'ar' ? 'أدخل أبعاد صحيحة' : 'Enter valid dimensions', 'error');
+                return;
+            }
+
+            const canvas = document.getElementById('resize-canvas-result');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(loadedResizeImg, 0, 0, w, h);
+
+            document.getElementById('resize-preview-wrapper').style.display = 'flex';
+            displayToast(languageDict[currentActiveLang].toastSuccess);
+        });
+
+        document.getElementById('resize-download-btn').addEventListener('click', () => {
+            const canvas = document.getElementById('resize-canvas-result');
+            const link = document.createElement('a');
+            link.download = 'resized-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        });
+
+        // --- 6. Images to PDF Merge Logic ---
+        let selectedPdfImages = [];
+        bindFileInput('img-pdf-file-input', (files) => {
+            selectedPdfImages = Array.from(files);
+            if (selectedPdfImages.length > 0) {
+                document.getElementById('img-pdf-process-btn').disabled = false;
+                const badge = document.getElementById('img-pdf-count-badge');
+                badge.innerText = `${currentActiveLang === 'ar' ? 'تم اختيار' : 'Selected'} ${selectedPdfImages.length} ${currentActiveLang === 'ar' ? 'صور' : 'images'}`;
+                badge.style.display = 'inline-flex';
+                displayToast(languageDict[currentActiveLang].toastLoaded);
+            }
+        });
+
+        document.getElementById('img-pdf-process-btn').addEventListener('click', async () => {
+            if (selectedPdfImages.length === 0) return;
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const fitMode = document.getElementById('img-pdf-fit-mode').value;
+                const margin = parseFloat(document.getElementById('img-pdf-margin-input').value) || 0;
+
+                let pdfDoc = null;
+
+                for (let idx = 0; idx < selectedPdfImages.length; idx++) {
+                    const file = selectedPdfImages[idx];
+                    const dataUrl = await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                    });
+
+                    const img = await new Promise((resolve) => {
+                        const image = new Image();
+                        image.onload = () => resolve(image);
+                        image.src = dataUrl;
+                    });
+
+                    const imgWidth = img.width;
+                    const imgHeight = img.height;
+
+                    if (fitMode === 'full_page') {
+                        const pageWidth = imgWidth + (margin * 2);
+                        const pageHeight = imgHeight + (margin * 2);
+                        const orientation = imgWidth > imgHeight ? 'l' : 'p';
+
+                        if (idx === 0) {
+                            pdfDoc = new jsPDF({
+                                orientation: orientation,
+                                unit: 'px',
+                                format: [pageWidth, pageHeight]
+                            });
+                        } else {
+                            pdfDoc.addPage([pageWidth, pageHeight], orientation);
+                        }
+
+                        pdfDoc.addImage(dataUrl, 'JPEG', margin, margin, imgWidth, imgHeight);
+                    } else {
+                        const orientation = imgWidth > imgHeight ? 'l' : 'p';
+                        if (idx === 0) {
+                            pdfDoc = new jsPDF({
+                                orientation: orientation,
+                                unit: 'mm',
+                                format: 'a4'
+                            });
+                        } else {
+                            pdfDoc.addPage('a4', orientation);
+                        }
+
+                        const pageWidth = pdfDoc.internal.pageSize.getWidth();
+                        const pageHeight = pdfDoc.internal.pageSize.getHeight();
+
+                        const availWidth = pageWidth - (margin * 2);
+                        const availHeight = pageHeight - (margin * 2);
+
+                        const ratio = Math.min(availWidth / imgWidth, availHeight / imgHeight);
+                        const printWidth = imgWidth * ratio;
+                        const printHeight = imgHeight * ratio;
+
+                        const xPos = margin + (availWidth - printWidth) / 2;
+                        const yPos = margin + (availHeight - printHeight) / 2;
+
+                        pdfDoc.addImage(dataUrl, 'JPEG', xPos, yPos, printWidth, printHeight);
+                    }
+                }
+
+                pdfDoc.save('merged-images.pdf');
+                displayToast(languageDict[currentActiveLang].toastSuccess);
+            } catch (err) {
+                displayToast(currentActiveLang === 'ar' ? 'حدث خطأ أثناء الدمج' : 'Error merging PDF', 'error');
+            }
+        });
+    </script>
+</body>
+</html>
